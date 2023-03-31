@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@font-face {
+    font-family: "matrix";
+    src: url("assets/fonts/ocr-a/ocr-aregular.ttf");
+  }
