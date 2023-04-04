@@ -146,6 +146,7 @@ export class TypeShuffle {
     fx6: () => this.fx6(),
   };
   totalChars = 0;
+  isAnimating = false;
 
   /**
    * Constructor.
@@ -197,6 +198,7 @@ export class TypeShuffle {
       }
     }
   }
+
   /**
    *
    * @returns {string} a random char from this.lettersAndSymbols
