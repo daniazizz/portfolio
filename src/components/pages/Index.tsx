@@ -18,7 +18,7 @@ const Index = ({ id }: PageProps) => {
         >
           <div className="flex">
             <p className="uppercase font-bold mr-2"> Status: </p>
-            <p>Actively looking for work</p>
+            <p>Open for new oppertunities</p>
           </div>
         </motion.div>
       </MatrixElement>
