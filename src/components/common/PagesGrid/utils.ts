@@ -26,8 +26,6 @@ const getGridWithDirections = <T>(
 ) => {
   let y = 0;
   let gridWithDirections = Array.from(Array(height), () => new Array(width));
-  console.log(grid);
-  console.log("Directions array:", gridWithDirections);
   while (y < height) {
     let x = 0;
     while (x < width) {
@@ -44,7 +42,6 @@ const getGridWithDirections = <T>(
         down && dirs.push({ label: down.label, direction: "DOWN" });
         left && dirs.push({ label: left.label, direction: "LEFT" });
         right && dirs.push({ label: right.label, direction: "RIGHT" });
-        console.log("inner", dirs, x, y);
         gridWithDirections[y][x] = {
           directions: dirs,
           element: grid[y][x]?.element,

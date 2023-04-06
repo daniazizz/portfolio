@@ -4,6 +4,7 @@ import {
   animate,
   motion,
   motionValue,
+  useAnimate,
   useInView,
 } from "framer-motion";
 import { ReactElement, ReactNode, useEffect, useRef, useState } from "react";
@@ -17,7 +18,7 @@ const arrowUp = (
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
-    className="w-20 h-20"
+    className="w-10 h-10 lg:w-16 lg:h-16"
   >
     <path
       strokeLinecap="round"
@@ -34,7 +35,7 @@ const arrowDown = (
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
-    className="w-20 h-20"
+    className="w-10 h-10 lg:w-16 lg:h-16"
   >
     <path
       strokeLinecap="round"
@@ -51,7 +52,7 @@ const arrowLeft = (
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
-    className="w-20 h-20"
+    className="w-10 h-10 lg:w-16 lg:h-16"
   >
     <path
       strokeLinecap="round"
@@ -68,7 +69,7 @@ const arrowRight = (
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
-    className="w-20 h-20"
+    className="w-10 h-10 lg:w-16 lg:h-16"
   >
     <path
       strokeLinecap="round"
@@ -80,7 +81,7 @@ const arrowRight = (
 
 interface Props {
   directions: DirectionWithLabel[];
-  onMove: (dir: Direction) => void;
+  onMove: (dir: DirectionWithLabel) => void;
   id: string;
   pageWidth: number;
   pageHeight: number;
@@ -97,12 +98,17 @@ const MovingPage = ({
 }: Props) => {
   const ref = useRef(null);
   const isInView = useInView(ref);
-  const opacity = motionValue(100);
-  const [forceRenderContent, setForceRenderContent] = useState(0);
+  const [opacity, _setOpacity] = useState(motionValue(0));
+  const [content, setContent] = useState<ReactNode>();
+  const [scope, animate] = useAnimate();
+
+  const trigger = true;
 
   useEffect(() => {
-    isInView ? animate(opacity, 100, { duration: 150 }) : opacity.set(0);
-    isInView && setForceRenderContent(() => forceRenderContent + 1);
+    // Performance: Children only get rendered when page is in view.
+    // Also allows for !re-rendering of childeren when page is back in view.
+    isInView ? setContent(children) : setContent(null);
+    isInView ? animate(opacity, 100, { duration: 150 }) : animate(opacity, 0);
   }, [isInView]);
 
   const upDirection = directions.find((d) => d.direction == "UP");
@@ -110,10 +116,12 @@ const MovingPage = ({
   const leftDirection = directions.find((d) => d.direction == "LEFT");
   const rightDirection = directions.find((d) => d.direction == "RIGHT");
 
-  const navigationClasses = "cursor-pointer text-sm hover:!scale-110";
+  const navigationClasses =
+    "cursor-pointer text-sm flex flex-col items-center hover:!scale-110 hover:underline-offset-4 hover:underline hover:underline-dashed";
 
   return (
     <motion.div
+      ref={scope}
       style={{ opacity }}
       className={`grid grid-cols-12 grid-rows-full h-full w-full p-4`}
       id={id}
@@ -128,9 +136,9 @@ const MovingPage = ({
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 1, delay: 2.5 }}
               className={navigationClasses}
-              onClick={() => onMove("UP")}
+              onClick={() => onMove(upDirection)}
             >
-              <div>
+              <div className="flex flex-col items-center text-center">
                 {arrowUp}
                 <p>{upDirection.label}</p>
               </div>
@@ -148,9 +156,9 @@ const MovingPage = ({
               animate={{ x: 0, opacity: 100 }}
               transition={{ duration: 1, delay: 2.5 }}
               className={navigationClasses}
-              onClick={() => onMove("LEFT")}
+              onClick={() => onMove(leftDirection)}
             >
-              <div>
+              <div className="flex flex-col items-center text-center">
                 {arrowLeft}
                 <p>{leftDirection.label}</p>
               </div>
@@ -161,7 +169,7 @@ const MovingPage = ({
 
       {/* CONTENT */}
       <div ref={ref} className="col-span-10 row-span-6">
-        <span key={forceRenderContent}>{children}</span>
+        <span>{content}</span>
       </div>
 
       {/* RIGHT */}
@@ -169,32 +177,37 @@ const MovingPage = ({
         <div className="h-full flex flex-col justify-center items-end">
           {rightDirection && (
             <motion.div
-              initial={{ x: -pageWidth / 2, opacity: 0 }}
+              initial={{ x: pageWidth / 2, opacity: 0 }}
               animate={{ x: 0, opacity: 100 }}
               transition={{ duration: 1, delay: 2.5 }}
               className={navigationClasses}
-              onClick={() => onMove("RIGHT")}
+              onClick={() => onMove(rightDirection)}
             >
-              {arrowRight}
-              <p>{rightDirection.label}</p>
+              <div className="flex flex-col items-center text-center">
+                {arrowRight}
+                <p>{rightDirection.label}</p>
+              </div>
             </motion.div>
           )}
         </div>
       </div>
 
       {/* DOWN */}
+
       <div className="col-span-full flex flex-col justify-end">
-        <div className="flex justify-center">
+        <div className="flex justify-center items-end">
           {downDirection && (
             <motion.div
-              initial={{ y: -pageHeight / 2, opacity: 0 }}
-              animate={{ y: 0, opacity: 100 }}
+              initial={{ y: pageHeight / 2, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 1, delay: 2.5 }}
               className={navigationClasses}
-              onClick={() => onMove("DOWN")}
+              onClick={() => onMove(downDirection)}
             >
-              <p>{downDirection.label}</p>
-              {arrowDown}
+              <div className="flex flex-col items-center text-center">
+                <p>{downDirection.label}</p>
+                {arrowDown}
+              </div>
             </motion.div>
           )}
         </div>

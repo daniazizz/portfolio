@@ -14,26 +14,35 @@ interface Props {
   id: Key;
   effect: MatrixEffect;
   children: ReactNode;
+  delay?: number;
 }
 
-const MatrixElement = ({ id, effect, children }: Props) => {
-  const [ts, setTs] = useState<TypeShuffle>();
+const MatrixElement = ({ id, effect, children, delay }: Props) => {
+  const [typeshuffle, setTypeshuffle] = useState<TypeShuffle>();
   const element_id = `matrix-element-${id}`;
   const [hidden, setHidden] = useState(true);
+  const [render, setRender] = useState(false);
 
   useEffect(() => {
-    console.log("matric element rendered");
     const textElement = document.getElementById(element_id);
-    setTs(new TypeShuffle(textElement));
+    setTypeshuffle(new TypeShuffle(textElement));
+
+    if (delay) {
+      setTimeout(() => {
+        setRender(true);
+      }, delay);
+    } else {
+      setRender(true);
+    }
   }, []);
 
   useEffect(() => {
-    ts && ts.trigger(effect);
-    ts && setHidden(false);
-  }, [ts]);
+    render && typeshuffle && typeshuffle.trigger(effect);
+    typeshuffle && render && setHidden(false);
+  }, [render, typeshuffle]);
 
   return (
-    <div id={element_id} hidden={hidden}>
+    <div id={element_id} style={{ opacity: hidden ? 0 : 1 }}>
       {children}
     </div>
   );
